@@ -1,0 +1,868 @@
+<?xml version="1.0"?>
+<project name="Arduino" default="build">
+  <!--echo message="os.name = ${os.name}" /-->
+  <!--echo message="os.arch = ${os.arch}" /-->
+  <!--echo message="os.version = ${os.version}" /-->
+
+  <!-- Sets properties for macosx/windows/linux depending on current system -->
+  <condition property="platform" value="macosx"><os family="mac" /></condition>
+  <condition property="platform" value="windows"><os family="windows" /></condition>
+  <condition property="platform" value="linux32"><os family="unix" arch="i386" /></condition>
+  <condition property="platform" value="linux64"><os family="unix" arch="amd64" /></condition>
+
+  <condition property="macosx"><equals arg1="${platform}" arg2="macosx" /></condition>
+  <condition property="windows"><equals arg1="${platform}" arg2="windows" /></condition>
+  <condition property="linux32"><equals arg1="${platform}" arg2="linux32" /></condition>
+  <condition property="linux64"><equals arg1="${platform}" arg2="linux64" /></condition>
+  <condition property="linux"><equals arg1="${platform}" arg2="linux32" /></condition>
+  <condition property="linux"><equals arg1="${platform}" arg2="linux64" /></condition>
+
+  <condition property="staging_folder" value="macosx"><equals arg1="${platform}" arg2="macosx" /></condition>
+  <condition property="staging_folder" value="windows"><equals arg1="${platform}" arg2="windows" /></condition>
+  <condition property="staging_folder" value="linux"><equals arg1="${platform}" arg2="linux32" /></condition>
+  <condition property="staging_folder" value="linux"><equals arg1="${platform}" arg2="linux64" /></condition>
+
+  <condition property="staging_hardware_folder" value="Arduino.app/Contents/Resources/Java/hardware"><equals arg1="${platform}" arg2="macosx" /></condition>
+  <condition property="staging_hardware_folder" value="hardware"><equals arg1="${platform}" arg2="windows" /></condition>
+  <condition property="staging_hardware_folder" value="hardware"><equals arg1="${platform}" arg2="linux32" /></condition>
+  <condition property="staging_hardware_folder" value="hardware"><equals arg1="${platform}" arg2="linux64" /></condition>
+
+  <condition property="arch-bits" value="32">
+    <equals arg1="${platform}" arg2="linux32"/>
+  </condition>
+  <condition property="arch-bits" value="64">
+    <equals arg1="${platform}" arg2="linux64"/>
+  </condition>
+
+  <loadproperties srcFile="sdk_locations.properties"/>
+  <condition property="sdk_location" value="${sdkloc_macosx}"><equals arg1="${platform}" arg2="macosx" /></condition>
+  <condition property="sdk_location" value="${sdkloc_windows}"><equals arg1="${platform}" arg2="windows" /></condition>
+  <condition property="sdk_location" value="${sdkloc_linux32}"><equals arg1="${platform}" arg2="linux32" /></condition>
+  <condition property="sdk_location" value="${sdkloc_linux64}"><equals arg1="${platform}" arg2="linux64" /></condition>
+  <basename property="sdk_filename" file="${sdk_location}"/>
+
+  <!-- Libraries required for running arduino -->
+  <fileset dir=".." id="runtime.jars">
+    <include name="core/core.jar" />
+    <include name="app/pde.jar" />
+    <include name="app/lib/ecj.jar" />
+    <include name="app/lib/jna.jar" />
+    <include name="app/lib/RXTXcomm.jar" />
+    <include name="app/lib/ant.jar" />
+    <include name="app/lib/ant-launcher.jar" />
+  </fileset>
+
+  <target name="build" description="Build Arduino.">
+    <antcall target="${platform}-build" />
+  </target>
+
+  <target name="run" description="Run Arduino.">
+    <antcall target="${platform}-run" />
+  </target>
+
+  <target name="dist" depends="revision-check"
+	  description="Build Arduino for distribution.">
+    <input message="Enter version number:"
+	   addproperty="version"
+	   defaultvalue="${revision}" />
+    <antcall target="${platform}-dist" />
+  </target>
+
+  <!-- "§$§$&, ant doesn't have a built-in help target :(  -->
+  <target name="help" description="Show project help">
+    <java classname="org.apache.tools.ant.Main">
+      <arg value="-p" />
+    </java>
+  </target>
+
+  <!-- - - - - - - - - - - - - - - - - - -->
+  <!-- Subprojects: Core, App, Libraries -->
+  <!-- - - - - - - - - - - - - - - - - - -->
+
+  <target name="subprojects-clean">
+    <subant buildpath="../core" target="clean"/>
+    <subant buildpath="../app" target="clean"/>
+  </target>
+
+  <target name="subprojects-build">
+    <subant buildpath="../core" target="build"/>
+    <subant buildpath="../app" target="build"/>
+  </target>
+
+  <!-- - - - - - - - - -->
+  <!-- Basic Assembly  -->
+  <!-- - - - - - - - - -->
+
+  <target name="assemble">
+    <fail unless="target.path"
+	  message="Do not call assemble from the command line." />
+
+    <!-- copy shared tools folder -->
+    <copy todir="${target.path}/tools">
+      <fileset dir="shared/tools" />
+    </copy>
+
+    <!-- copy library folder -->
+    <copy todir="${target.path}/libraries">
+      <fileset dir="../libraries" />
+    </copy>
+
+    <!-- copy hardware folder -->
+    <copy todir="${target.path}/hardware">
+      <fileset dir="../hardware">
+        <exclude name="arduino/sam/system/CMSIS/Device/ATMEL/*/svd/"/>
+        <exclude name="arduino/sam/system/CMSIS/Device/ATMEL/*/html/"/>
+        <exclude name="arduino/sam/system/CMSIS/CMSIS/Lib/ARM/*M0*"/>
+        <exclude name="arduino/sam/system/CMSIS/CMSIS/Lib/ARM/*M4*"/>
+        <exclude name="arduino/sam/system/CMSIS/CMSIS/Lib/GCC/*M0*"/>
+        <exclude name="arduino/sam/system/CMSIS/CMSIS/Lib/GCC/*M4*"/>
+        <exclude name="arduino/x86/firmwares/izmir/"/>
+        <exclude name="arduino/x86/ide-helper/"/>
+        <exclude name="arduino/x86/releases/"/>
+        <exclude name="arduino/x86/tools/izmir/binary-redistro/"/>
+        <exclude name="arduino/x86/tools/izmir/lrzsz-0.12.20.tar*"/>
+        <exclude name="arduino/x86/tools/izmir/Readme*"/>
+        <exclude name="arduino/x86/.git/"/>
+        <exclude name="arduino/edison/firmwares/izmir/"/>
+        <exclude name="arduino/edison/ide-helper/"/>
+        <exclude name="arduino/edison/releases/"/>
+        <exclude name="arduino/edison/tools/izmir/binary-redistro/"/>
+        <exclude name="arduino/edison/tools/izmir/lrzsz-0.12.20.tar*"/>
+    	<exclude name="arduino/edison/tools/izmir/Readme*"/>
+	    <exclude name="arduino/edison/.git/"/>
+      </fileset>
+    </copy>
+
+    <!-- copy shared examples folder -->
+    <copy todir="${target.path}/examples">
+      <fileset dir="shared/examples" />
+    </copy>
+
+    <!-- Unzip documentation -->
+    <unzip dest="${target.path}" src="shared/reference.zip" overwrite="false"/>
+
+    <!-- Write the revision file! -->
+    <echo file="${target.path}/lib/version.txt" message="${version}" />
+  </target>
+
+
+  <!-- - - - - - - - - -->
+  <!-- Revision check  -->
+  <!-- - - - - - - - - -->
+  <target name="revision-check">
+    <!-- figure out the revision number -->
+    <loadfile srcfile="shared/revisions.txt" property="revision">
+      <filterchain>
+        <ignoreblank />
+        <headfilter lines="1"/>
+        <tokenfilter>
+          <linetokenizer includeDelims="false" />
+          <!-- grab the thing from the first line that's 4 digits -->
+          <containsregex pattern="ARDUINO (.*) " />
+          <replaceregex pattern="ARDUINO ([^ ]*).*" replace="\1" />
+        </tokenfilter>
+        <tokenfilter>
+          <stringtokenizer suppressdelims="true" />
+        </tokenfilter>
+      </filterchain>
+    </loadfile>
+    <echo message="Latest revision detected in shared/revision.txt is: ${revision}" />
+	
+	<property name="version"
+	   value="${revision}" />
+
+    <!-- figure out the revision number in base.java -->
+    <loadfile srcfile="../app/src/processing/app/Base.java"
+	      property="revision.base">
+      <filterchain>
+        <tokenfilter>
+          <linetokenizer />
+          <containsregex pattern="String VERSION_NAME = "/>
+          <replaceregex pattern="[^0-9]*" flags="g" replace=""/>
+        </tokenfilter>
+      </filterchain>
+    </loadfile>
+    <echo message="Revision in Base.java is: ${revision.base}" />
+  </target>
+
+  <!-- - - - - - - - -->
+  <!-- Mac OS X      -->
+  <!-- - - - - - - - -->
+  
+  <!-- Set 'x86_disfile_available' property if x86 toolchain dist_file is downloaded             -->
+  <!-- Set 'x86_toolchain_installed' property if x86 toolchain is installed in working directory -->
+  <target name="check-x86-toolchain">
+    <available file="${staging_folder}/dist/${dist_file}" property="x86_distfile_available" />
+    <available file="${staging_folder}/work/hardware/${staging_hardware_sub_folder}/${dist_check_file}" property="x86_toolchain_installed" />
+  </target>
+
+  <!-- Retrieve x86 toolchain -->
+  <target name="get-x86-toolchain" depends="check-x86-toolchain" unless="x86_distfile_available">
+    <get src="${dist_url}" dest="${staging_folder}/dist/${dist_file}" verbose="true" username="${x86-toolchain-username}" password="${x86-toolchain-password}"/>
+  </target>
+
+  <target name="unzip-x86-toolchain" depends="get-x86-toolchain, check-x86-toolchain"
+      unless="x86_toolchain_installed">
+    <!-- Unzip toolchain to the destination folder -->
+    <exec executable="tar" output="/dev/null">
+      <arg value="xfj"/>
+      <arg value="${staging_folder}/dist/${dist_file}"/>
+	  <arg value="--directory=${staging_folder}/work/${staging_hardware_folder}/${staging_hardware_sub_folder}/"/>
+    </exec>
+  </target>
+
+  <!-- Set 'edison_disfile_available' property if edison toolchain dist_file is downloaded             -->
+  <!-- Set 'edison_toolchain_installed' property if edison toolchain is installed in working directory -->
+  <target name="check-edison-toolchain">
+    <available file="${staging_folder}/dist/${dist_file}" property="edison_distfile_available" />
+    <available file="${staging_folder}/work/hardware/${staging_hardware_sub_folder}/${dist_check_file}" property="edison_toolchain_installed" />
+  </target>
+
+  <!-- Retrieve edison toolchain -->
+  <target name="get-edison-toolchain" depends="check-edison-toolchain" unless="edison_distfile_available">
+    <setproxy proxyhost="jf.proxy.intel.com" proxyport="911" nonproxyhosts="*.intel.com"/>
+    <get src="${dist_url}" dest="${staging_folder}/dist/${dist_file}" verbose="true" username="${edison-toolchain-username}" password="${edison-toolchain-password}" />
+  </target>
+
+  <target name="unzip-edison-toolchain" depends="get-edison-toolchain, check-edison-toolchain"
+      unless="edison_toolchain_installed">
+    <!-- Unzip toolchain to the destination folder -->
+    <mkdir dir="${staging_folder}/work/${staging_hardware_folder}/tools/edison" />
+    <exec executable="tar" failonerror="true">
+      <arg value="xfj"/>
+      <arg value="${staging_folder}/dist/${dist_file}"/>
+	  <arg value="--directory=${staging_folder}/work/${staging_hardware_folder}/tools/edison"/>
+    </exec>
+  </target>
+
+  <target name="macosx-clean" depends="subprojects-clean" description="Clean Mac OS X build">
+    <delete dir="macosx/work" />
+    <delete dir="macosx/working_dir" />
+    <delete dir="macosx/working.dmg" />
+    <delete file="macosx/arduino-*.dmg" />
+    <delete>
+      <fileset dir="macosx" includes="arduino-*macosx*.zip"/>
+    </delete>
+  </target>
+
+  <target name="macosx-checkos" unless="macosx">
+    <echo>
+      =======================================================
+      Arduino for Mac OS X can only be built on Mac OS X.
+
+      Bye.
+      =======================================================
+    </echo>
+    <fail message="wrong platform (${os.name})" />
+  </target>
+
+  <target name="macosx-build" if="macosx" depends="revision-check, macosx-checkos, subprojects-build" description="Build Mac OS X version">
+    <mkdir dir="macosx/work" />
+
+    <!-- assemble the pde -->
+    <copy todir="macosx/work/Arduino.app">
+      <fileset dir="macosx/template.app" includes="**"/>
+    </copy>
+
+<!--    <rename src="macosx/work/template.app"
+	    dest="macosx/work/Arduino.app" />
+    <move file="macosx/work/template.app"
+	  tofile="macosx/work/Arduino.app" />-->
+
+    <chmod file="macosx/work/Arduino.app/Contents/MacOS/JavaApplicationStub" perm="755" />
+
+    <copy todir="macosx/work/Arduino.app/Contents/Resources/Java" flatten="true">
+      <fileset refid="runtime.jars"/>
+    </copy>
+
+    <copy todir="macosx/work/Arduino.app/Contents/Resources/Java">
+      <fileset dir="shared" includes="lib/**" />
+      <fileset file="shared/revisions.txt" />
+    </copy>
+
+    <!-- Unzip AVR tools -->
+    <!-- <unzip dest="macosx/work/Arduino.app/Contents/Resources/Java/hardware" src="macosx/dist/tools-universal.zip" overwrite="false"/> -->
+
+    <exec executable="unzip" failonerror="true">
+      <arg value="-q" />
+      <arg value="-n" />
+      <arg value="-d" />
+      <arg value="macosx/work/Arduino.app/Contents/Resources/Java/hardware" />
+      <arg value="macosx/dist/tools-universal.zip" />
+    </exec>
+
+    <copy todir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/">
+      <fileset file="macosx/dist/bossac" />
+    </copy>
+
+    <chmod file="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/bossac" perm="+x" />
+
+    <copy todir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/avr/avr/include/avr">
+      <fileset file="macosx/dist/eeprom.h" />
+    </copy>
+
+    <antcall target="assemble">
+      <param name="target.path" value="macosx/work/Arduino.app/Contents/Resources/Java" />
+    </antcall>
+	<!--
+    <antcall target="unzip-arm-toolchain">
+      <param name="dist_file" value="gcc-arm-none-eabi-4.4.1-2010q1-188-macos.tar.gz" />
+      <param name="dist_url" value="http://arduino.googlecode.com/files/gcc-arm-none-eabi-4.4.1-2010q1-188-macos.tar.gz" />
+      <param name="dist_check_file" value="g++_arm_none_eabi" />
+    </antcall>
+	-->
+	<!-- intel hardware stuff -->
+	<antcall target="unzip-x86-toolchain">
+      <param name="staging_hardware_sub_folder" value="tools" />
+      <param name="dist_file" value="x86-tools-mac.tar.bz2" />
+      <param name="dist_url" value="..." />
+      <param name="dist_check_file" value="x86" />
+    </antcall>
+
+    <copy tofile="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/x86/bin/upgrade.sh" file="macosx/dist/upgrade_osx.sh" />
+    <chmod perm="+x" file="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/x86/bin/upgrade.sh" />
+
+    <copy todir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/x86/bin">
+       <fileset dir="shared" includes="*.cap" />
+    </copy>
+	<antcall target="unzip-edison-toolchain">
+      <param name="staging_hardware_sub_folder" value="tools" />
+      <param name="dist_file" value="${sdk_filename}" />
+      <param name="dist_url" value="${sdk_location}" />
+      <param name="dist_check_file" value="edison" />
+    </antcall>
+    <!-- lsz lrz -->
+    <exec executable="tar" output="/dev/null" failonerror="true">
+      <arg value="xfj"/>
+      <arg value="${staging_folder}/dist/x86-zmodem.tar.bz2"/>
+	  <arg value="--directory=${staging_folder}/work/${staging_hardware_folder}/tools/"/>
+    </exec>
+
+    <copy tofile="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/edison/bin/upgrade.sh" file="macosx/dist/upgrade_osx.sh" />
+    <chmod perm="+x" file="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/edison/bin/upgrade.sh" />
+
+    <copy todir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/edison/bin">
+       <fileset dir="shared" includes="*.cap" />
+    </copy>
+
+
+      <delete includeEmptyDirs="true" quiet="true">
+      <fileset dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools" includes="**/3.4.6/**/*"/>
+      <fileset dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools" includes="**/3.4.6"/>
+      <fileset dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools" includes="**/man/**/*"/>
+      <fileset dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools" includes="**/man"/>
+    </delete>
+  </target>
+
+  <target name="macosx-run" depends="macosx-build" description="Run Mac OS X version">
+    <exec executable="macosx/work/Arduino.app/Contents/MacOS/JavaApplicationStub" spawn="true" failonerror="true"/>
+  </target>
+
+  <target name="macosx-debug" depends="macosx-build" description="Run Mac OS X version">
+    <exec executable="macosx/work/Arduino.app/Contents/MacOS/JavaApplicationStub" spawn="false" failonerror="true"/>
+  </target>
+
+  <!-- - - - - - - - - - - - - - - - -->
+  <!-- Sign application for MacOSX.  -->
+  <!-- - - - - - - - - - - - - - - - -->
+  <target name="macosx-signed-dist" if="macosx" depends="macosx-singed-dist-check, dist"
+    description="Create a downloadable and signed .zip for the Mac OS X version">
+    <fail unless="version" message="Please set the property 'version' to correctly sign distribution file" />
+
+   <!-- use macosx/work/Arduino.app directly, rather than unzipping, to preserve permissions -->
+
+    <!-- Remove everything from working folder -->
+    <!--<delete dir="macosx/work/Arduino.app" />-->
+
+    <!-- Unzip unsigned app into working dir -->
+    <!--<exec executable="unzip" dir="macosx/work">
+      <arg line="../arduino-${version}-${platform}.zip" />
+    </exec>-->
+
+    <!-- Unlock keychain file -->
+    <exec executable="security" dir="macosx/work" failonerror="true">
+      <arg line="unlock-keychain -p &quot;${macosx-sign-keychain-pass}&quot; &quot;${macosx-sign-keychain}&quot;" />
+    </exec>
+
+    <!-- Sign app -->
+    <exec executable="codesign" dir="macosx/work" failonerror="true">
+      <arg line="--keychain &quot;${macosx-sign-keychain}&quot; --force -s &quot;${macosx-sign-id}&quot; -v Arduino.app/" />
+    </exec>
+
+    <!-- Check for successful signing -->
+    <exec executable="codesign" dir="macosx/work" failonerror="true">
+      <arg line="-vvvv Arduino.app/" />
+    </exec>
+
+    <delete file="macosx/arduino-${version}-${platform}.zip" />
+
+    <!-- Create signed zip file -->
+    <exec executable="zip" dir="macosx/work" failonerror="true">
+      <arg line="-q -r -y ../arduino-${version}-${platform}-signed.zip ." />
+    </exec>
+
+    <echo>
+      =======================================================
+      Arduino for Mac OS X built and signed.
+
+      macosx/arduino-${version}-${platform}-signed.zip
+      =======================================================
+    </echo>
+  </target>
+
+  <target name="macosx-singed-dist-check">
+    <fail unless="macosx-sign-keychain" message="Please set the property 'macosx-sign-keychain' to the correct keychain file" />
+    <fail unless="macosx-sign-keychain-pass" message="Please set the property 'macosx-sign-keychain-pass' with the password to unlock the keychain" />
+    <fail unless="macosx-sign-id" message="Please set the property 'macosx-sign-id' to the correct cert identifier" />
+  </target>
+
+  <!-- - - - - - - - - - - - - - - - - - - -->
+  <!-- Build distribution file for MacOSX. -->
+  <!-- - - - - - - - - - - - - - - - - - - -->
+  <target name="macosx-dist" if="macosx" depends="macosx-build" description="Create a downloadable .zip for the Mac OS X version">
+    <!-- The ant copy command does not preserve permissions. -->
+    <chmod file="macosx/work/Arduino.app/Contents/MacOS/JavaApplicationStub" perm="+x" />
+    <chmod perm="+x">
+      <fileset dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin" includes="**/*" />
+      <fileset dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/avr/avr/bin" includes="**/*" />
+      <fileset dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/avr/avr-3/bin" includes="**/*" />
+      <fileset dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/avr/avr-4/bin" includes="**/*" />
+      <fileset dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/avr/libexec/gcc/avr/4.3.2/" includes="**/cc1*" />
+    </chmod>
+
+    <replace file="macosx/work/Arduino.app/Contents/Info.plist"
+             token="VERSION" value="${version}" />
+    <replace file="macosx/work/Arduino.app/Contents/Info.plist"
+             token="REVISION" value="${revision}" />
+
+	<!-- temporarily delete all non-Intel hardware files -->
+	<delete dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/avr" />
+	<delete dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/gcc-arm-none-eabi-4.7.4-2013q2" />
+	<delete file="macosx/work/Arduino.app/Contents/Resources/Java/hardware/tools/bossac" />
+	<delete dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/arduino/avr" />
+	<delete dir="macosx/work/Arduino.app/Contents/Resources/Java/hardware/arduino/sam" />
+
+    <exec executable="zip" dir="macosx/work" failonerror="true">
+      <arg line="-q -r -y ../arduino-${version}-${platform}.zip ." />
+    </exec>
+    <!-- <exec executable="ditto" dir="macosx/work">
+      <arg line="-c -k -rsrc . ../arduino-${version}-macosx.zip" />
+    </exec> -->
+
+    <echo>
+      =======================================================
+      Arduino for Mac OS X was built. Grab the image from
+
+      macosx/arduino-${version}-${platform}.zip
+      =======================================================
+    </echo>
+  </target>
+
+  <target name="macosx-dist-old" if="macosx" depends="macosx-build" description="Create a .dmg of the Mac OS X version">
+    <!-- now build the dmg -->
+    <gunzip src="macosx/template.dmg.gz" dest="macosx/working.dmg" />
+
+    <mkdir dir="macosx/working_dir" />
+    <exec executable="hdiutil" failonerror="true">
+      <arg line="attach macosx/working.dmg -noautoopen -mountpoint macosx/working_dir" />
+      <!--<arg line="attach macosx/working.dmg -noautoopen -quiet -mountpoint macosx/working_dir" />-->
+    </exec>
+
+    <copy todir="macosx/working_dir">
+      <fileset dir="macosx/work" />
+    </copy>
+
+    <!-- The ant copy command does not preserve permissions. -->
+    <chmod file="macosx/working_dir/Arduino.app/Contents/MacOS/JavaApplicationStub" perm="+x" />
+    <chmod perm="+x">
+      <fileset dir="macosx/working_dir/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin" includes="**/*" />
+      <fileset dir="macosx/working_dir/Arduino.app/Contents/Resources/Java/hardware/tools/avr/avr/bin" includes="**/*" />
+      <fileset dir="macosx/working_dir/Arduino.app/Contents/Resources/Java/hardware/tools/avr/avr-3/bin" includes="**/*" />
+      <fileset dir="macosx/working_dir/Arduino.app/Contents/Resources/Java/hardware/tools/avr/avr-4/bin" includes="**/*" />
+      <fileset dir="macosx/working_dir/Arduino.app/Contents/Resources/Java/hardware/tools/avr/libexec/gcc/avr/3.4.6/" includes="**/cc1*" />
+      <fileset dir="macosx/working_dir/Arduino.app/Contents/Resources/Java/hardware/tools/avr/libexec/gcc/avr/4.3.2/" includes="**/cc1*" />
+    </chmod>
+
+    <!-- Pause briefly for the OS to catch up with the DMG changes. 
+	 This prevents "hdiutil: couldn't eject "disk3" - Resource busy"
+	 errors when ejecting the disk in the next step.
+         You may need to set this value higher for your system. -->
+    <sleep seconds="3" />
+
+    <exec executable="hdiutil" failonerror="true">
+      <!--<arg line="detach macosx/working_dir -quiet -force" />-->
+      <arg line="detach macosx/working_dir" />
+    </exec>
+
+    <delete file="macosx/arduino-*.dmg" />
+    <exec executable="hdiutil" failonerror="true">
+      <arg line="convert macosx/working.dmg -quiet -format UDZO -imagekey zlib-level=9 -o macosx/arduino-${version}.dmg" />
+    </exec>
+
+    <!-- Clean up the interim files. -->
+    <delete file="macosx/working.dmg" />
+    <delete dir="macosx/working_dir" />
+
+    <echo>
+      =======================================================
+      Arduino for Mac OS X was built. Grab the image from
+
+      macosx/arduino-${version}.dmg
+      =======================================================
+    </echo>
+  </target>
+
+  <!-- - - - - - - - -->
+  <!-- Linux         -->
+  <!-- - - - - - - - -->
+
+  <target name="linux-clean" depends="subprojects-clean" description="Clean linux version">
+    <delete dir="linux/work" />
+    <delete>
+      <fileset dir="linux" includes="arduino-*linux*.tgz"/>
+    </delete>
+  </target>
+
+  <target name="linux-checkos" unless="linux">
+    <echo>
+      =======================================================
+      Arduino for Linux can only be built on on unix systems.
+
+      Bye.
+      =======================================================
+    </echo>
+
+    <fail message="wrong platform (${os.name})" />
+  </target>
+
+  <target name="linux-build" depends="revision-check, linux-checkos, subprojects-build" description="Build linux version">
+    <mkdir dir="linux/work" />
+
+    <copy todir="linux/work">
+      <fileset dir="shared" includes="lib/**" />
+      <fileset file="shared/revisions.txt" />
+    </copy>
+
+    <copy todir="linux/work">
+      <fileset dir="linux/dist" includes="lib/**" />
+    </copy>
+
+    <copy todir="linux/work/lib" flatten="true">
+      <fileset refid="runtime.jars" />
+    </copy>
+
+    <antcall target="assemble">
+      <param name="target.path" value="linux/work" />
+    </antcall>
+
+    <copy todir="linux/work" file="linux/dist/arduino" />
+    <chmod perm="755" file="linux/work/arduino" />
+
+	<copy todir="linux/work/hardware/tools" file="linux/dist/install_script.sh" />
+	<chmod perm="755" file="linux/work/hardware/tools/install_script.sh" />
+
+    <copy todir="linux/work" file="linux/dist/arduino" />
+    <chmod perm="755" file="linux/work/arduino" />
+
+    <copy todir="linux/work/hardware">
+      <fileset dir="linux/dist" includes="tools/**" />
+    </copy>
+
+    <chmod perm="755" file="linux/work/hardware/tools/lsz" />
+    <chmod perm="755" file="linux/work/hardware/tools/lsz64" />
+
+    <copy tofile="linux/work/hardware/tools/upgrade.sh" file="linux/dist/tools/upgrade_linux.sh" />
+    <chmod perm="755" file="linux/work/hardware/tools/upgrade.sh" />
+
+    <copy todir="linux/work/hardware/tools">
+        <fileset dir="shared" includes="*.cap" />
+    </copy>
+
+
+
+  </target>
+
+  <target name="linux32-build" depends="linux-build" description="Build linux (32-bit) version">
+    <!-- Unzip X86 tools -->
+	<exec executable="tar" dir="linux/work/hardware/tools">
+      <arg value="-xjf"/>
+      <arg value="../../../x86_tools_linux32.tar.bz2"/>
+    </exec>
+	<antcall target="get-edison-toolchain">
+      <param name="staging_hardware_sub_folder" value="tools" />
+      <param name="dist_file" value="${sdk_filename}" />
+      <param name="dist_url" value="${sdk_location}" />
+      <param name="dist_check_file" value="edison" />
+    </antcall>
+    <copy tofile="linux/work/hardware/tools/edison/${sdk_filename}" file="${staging_folder}/dist/${sdk_filename}" />
+    <chmod file="linux/work/hardware/tools/edison/${sdk_filename}" perm="755"/>
+    <chmod file="linux/work/hardware/tools/edison/install_script.sh" perm="755"/>
+
+    <copy tofile="linux/work/lib/librxtxSerial.so" file="linux/dist/lib/librxtxSerial.so" overwrite="true" />
+    <copy tofile="linux/work/hardware/tools/lsz" file="linux/dist/tools/lsz" overwrite="true" />
+    <chmod perm="755" file="linux/work/hardware/tools/lsz" />
+  </target>
+
+  <target name="linux64-build" depends="linux-build" description="Build linux (64-bit) version">
+    <!-- Unzip X86 tools -->
+	<exec executable="tar" dir="linux/work/hardware/tools">
+      <arg value="-xjf"/>
+      <arg value="../../../x86_tools_linux64.tar.bz2"/>
+    </exec>
+	<antcall target="get-edison-toolchain">
+      <param name="staging_hardware_sub_folder" value="tools" />
+      <param name="dist_file" value="${sdk_filename}" />
+      <param name="dist_url" value="${sdk_location}" />
+      <param name="dist_check_file" value="edison" />
+    </antcall>
+    <copy tofile="linux/work/hardware/tools/edison/${sdk_filename}" file="${staging_folder}/dist/${sdk_filename}" />
+    <chmod file="linux/work/hardware/tools/edison/${sdk_filename}" perm="755"/>
+    <chmod file="linux/work/hardware/tools/edison/install_script.sh" perm="755"/>
+    <chmod file="${staging_folder}/dist/${sdk_filename}" perm="755"/>
+
+    <copy tofile="linux/work/lib/librxtxSerial.so" file="linux/dist/lib/librxtxSerial64.so" overwrite="true" />
+    <copy tofile="linux/work/hardware/tools/lsz" file="linux/dist/tools/lsz64" overwrite="true" />
+
+    <chmod perm="755" file="linux/work/hardware/tools/lsz" />
+
+  </target>
+
+  <target name="linux32-run" depends="linux32-build" description="Run Linux (32-bit) version">
+    <exec executable="./linux/work/arduino" spawn="false" failonerror="true"/>
+  </target>
+
+  <target name="linux64-run" depends="linux64-build" description="Run Linux (64-bit) version">
+    <exec executable="./linux/work/arduino" spawn="false" failonerror="true"/>
+  </target>
+
+  <target name="linux-dist" depends="build"
+	  description="Build .tar.gz of linux version">
+
+    <!--get src="http://dev.processing.org/build/jre-tools-6u18-linux-i586.tgz" 
+	 dest="linux/jre.tgz" 
+	 usetimestamp="true" />    
+    <untar compression="gzip" 
+	   dest="linux/work" 
+	   src="linux/jre.tgz" 
+	   overwrite="false"/-->
+
+<!--
+    <tar compression="gzip" basedir="linux/work"
+	 destfile="linux/arduino-${version}.tgz" />
+
+    <tar compression="gzip" destfile="linux/arduino-${version}-linux.tgz">
+      <tarfileset dir="linux/work"
+		  prefix="arduino-${version}"
+		  excludes="arduino,
+			    hardware/tools/avrdude,
+			    java/**"
+		  />
+      <tarfileset file="linux/work/arduino" filemode="755" prefix="arduino-${version}" />
+      <tarfileset file="linux/work/hardware/tools/avrdude" filemode="755"
+		  prefix="arduino-${version}/hardware/tools" />
+    </tar>
+-->
+    <move file="linux/work" tofile="linux/arduino-${version}" />
+
+    <exec executable="tar" dir="linux" failonerror="true">
+      <arg value="-z"/>
+      <arg value="-c"/>
+      <arg value="-f"/>
+      <arg value="arduino-${version}-${platform}.tgz"/>
+      <arg value="arduino-${version}"/>
+    </exec>
+
+    <move file="linux/arduino-${version}" tofile="linux/work" />
+
+    <echo>
+      =======================================================
+      Arduino for Linux was built. Grab the archive from
+
+      build/linux/arduino-${version}-${platform}.tgz
+      =======================================================
+    </echo>
+  </target>
+
+  <target name="linux32-dist" depends="linux-dist"
+	  description="Build .tar.gz of linux version" />
+
+  <target name="linux64-dist" depends="linux-dist"
+	  description="Build .tar.gz of linux version" />
+
+  <!-- - - - - - - - -->
+  <!-- Windows       -->
+  <!-- - - - - - - - -->
+
+  <target name="windows-clean" depends="subprojects-clean"
+	  description="Clean windows version">
+    <delete dir="windows/work" />
+    <delete>
+      <fileset dir="windows" includes="arduino-*windows*.zip"/>
+    </delete>
+  </target>
+
+  <target name="windows-checkos" unless="windows">
+    <echo>
+      =======================================================
+      Arduino for Windows can only be built on windows.
+
+      Bye.
+      =======================================================
+    </echo>
+
+    <fail message="wrong platform (${os.name})" />
+  </target>
+
+  <target name="windows-build"
+	  depends="revision-check, windows-checkos, subprojects-build"
+	  description="Build windows version">
+    <mkdir dir="windows/work" />
+
+    <!-- assemble the pde -->
+    <mkdir dir="windows/work/lib" />
+    <copy todir="windows/work/lib" flatten="true">
+      <fileset refid="runtime.jars" />
+    </copy>
+
+    <copy todir="windows/work">
+      <fileset dir="shared" includes="lib/**" />
+      <fileset file="shared/revisions.txt" />
+    </copy>
+
+    <fixcrlf file="windows/work/revisions.txt" eol="dos"/>
+
+    <copy todir="windows/work">
+      <fileset dir="windows/dist" includes="*.dll" />
+    </copy>
+
+    <copy todir="windows/work">
+      <fileset dir="windows/dist" includes="drivers/**" />
+    </copy>
+
+    <copy todir="windows/work/hardware/tools/x86/bin">
+      <fileset dir="windows/dist/x86" includes="**" />
+    </copy>
+
+    <copy todir="windows/work/hardware/tools/x86/bin">
+        <fileset dir="shared" includes="*.cap" />
+    </copy>
+
+    <antcall target="assemble">
+      <param name="target.path" value="windows/work" />
+    </antcall>
+
+    <property name="launch4j.dir" value="windows/launcher/launch4j/" />
+    <taskdef name="launch4j"
+	     classname="net.sf.launch4j.ant.Launch4jTask"
+	     classpath="${launch4j.dir}/launch4j.jar; ${launch4j.dir}/lib/xstream.jar" />
+
+    <copy todir="windows/work">
+      <fileset dir="windows/launcher"
+	       includes="about.bmp, application.ico, config.xml"/>
+    </copy>
+    <launch4j configFile="windows/work/config.xml" />
+    <delete dir="windows/work"
+	    includes="about.bmp, application.ico, config.xml" />
+
+    <!-- cygwin requires html, dll, and exe to have the +x flag -->
+    <chmod perm="755">
+      <fileset dir="windows/work" includes="**/*.html, **/*.dll, **/*.exe" />
+    </chmod>
+
+    <antcall target="windows-unzip-x86-toolchain" />
+    <antcall target="windows-unzip-edison-toolchain" />
+
+  </target>
+
+  <target name="windows-run" depends="windows-build"
+	  description="Run windows version">
+    <exec executable="windows/work/arduino.exe"
+	  dir="windows/work" spawn="true" failonerror="true"/>
+  </target>
+
+  <target name="windows-unzip-x86-toolchain">
+    <!-- Unzip toolchain to the destination folder -->
+    <unzip dest="windows/work/hardware/tools/x86" src="windows/dist/x86.zip"/>
+  </target>
+
+  <target name="windows-unzip-edison-toolchain">
+    <delete dir="windows/work/hardware/tools/edison"/>
+    <!-- Unzip toolchain to the destination folder -->
+    <antcall target="unzip-edison-toolchain">
+      <param name="staging_hardware_sub_folder" value="tools" />
+      <param name="dist_file" value="${sdk_filename}" />
+      <param name="dist_url" value="${sdk_location}" />
+      <param name="dist_check_file" value="edison" />
+    </antcall>
+  </target>
+
+
+  <target name="windows-dist" depends="windows-build"
+	  description="Create .zip files of windows version">
+
+    <!--get src="http://dev.processing.org/build/jre-tools-6u18-windows-i586.zip" 
+	 dest="windows/jre.zip" 
+	 usetimestamp="true" /-->
+
+    <unzip dest="windows/work" src="windows/jre.zip" overwrite="false"/>
+
+    <zip destfile="windows/arduino-${version}-${platform}.7z" level="9">
+      <zipfileset dir="windows/work" prefix="arduino-${version}" />
+    </zip>
+    <zip destfile="windows/arduino-${version}-${platform}-expert.7z" level="9">
+      <zipfileset dir="windows/work" prefix="arduino-${version}" excludes="java/**" />
+    </zip>
+
+    <echo>
+      =======================================================
+      Arduino for Windows was built. Grab the archive from
+
+      windows/arduino-${version}-${platform}.7z
+      windows/arduino-${version}-${platform}-expert.7z
+      =======================================================
+    </echo>
+  </target>
+
+
+  <!-- - - - - - - - -->
+  <!-- Source        -->
+  <!-- - - - - - - - -->
+
+   <target name="source-dist" depends="revision-check"
+	  description="Build .tar.gz of source code">
+    <input message="Enter version number:"
+	   addproperty="version"
+	   defaultvalue="${revision}" />
+
+    <tar compression="gzip" destfile="arduino-${version}-src.tar.gz">
+      <tarfileset dir="../"
+		  prefix="arduino-${version}"
+		  excludes="**/*.tgz,
+			     **/*.bz2,
+			     **/build/macosx/,
+			     **/build/windows/,
+			     **/work/,
+			     **/.git/,
+			     **/*.class"
+		  />
+    </tar>
+
+    <echo>
+      =======================================================
+      Arduino source distribution was built. Grab the archive from
+
+      arduino-${version}-src.tar.gz
+      =======================================================
+    </echo>
+  </target>
+
+
+  <!-- - - - - - - - -->
+  <!-- Run It!       -->
+  <!-- - - - - - - - -->
+
+  <target name="clean" description="Perform a spring cleaning"
+	  depends="linux-clean, windows-clean, macosx-clean, subprojects-clean">
+  </target>
+
+</project>

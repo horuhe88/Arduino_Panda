@@ -1,0 +1,20 @@
+HEADER = SilverButte_RegDefs.ld SilverButte_FldDefs.h SilverButte_RegDefs.h rom_export.h 
+SOURCE = SilverButte_CfgDefs.c SilverButte_RegDefs.c startup.s init.c main.c
+OBJECT = SilverButte_CfgDefs.o SilverButte_RegDefs.o startup.s init.o main.o
+HEX = out.hex
+ELF = out.elf
+LIS = out.lis
+LST = out.lst
+MAP = out.map
+TARGET = ${HEX}
+PREREQ = ${SOURCE} ${HEADER} SilverButte_RegDefs.ld Makefile
+
+${TARGET} : ${PREREQ}
+    ${SB_TOOLS}/sysroot-nano-newlib/usr/bin/nanoc -c -mtune=nanofast -DPOLLED -Wall -Wextra -pedantic -Wconversion -Wcast-align -Wpointer-arith -Wuninitialized -Wno-long-long -Wno-language-extension-token -fmessage-length=0 -fstack-check -ffreestanding -ffunction-sections --sysroot=${SB_TOOLS}/sysroot-nano-newlib -O3 ${SOURCE}
+    ${SB_TOOLS}/sysroot-nano-newlib/usr/bin/nanoc -nostartfiles -mtune=nanofast -Wall -Wextra -Wconversion -Wcast-align -Wpointer-arith -Wuninitialized -Wno-long-long -fmessage-length=0 -fstack-check -ffreestanding -pedantic --sysroot=${SB_TOOLS}/sysroot-nano-newlib -o ${ELF} -Wl,-gc-sections,-static,-lm,-Map=${MAP},-cref -T SilverButte_RegDefs.ld ${OBJECT}
+    ${SB_TOOLS}/sysroot-nano-newlib/usr/bin/nano-newlib-elf-objdump -d ${ELF} > ${LST}
+    ${SB_TOOLS}/sysroot-nano-newlib/usr/bin/nano-newlib-elf-objcopy -O verilog ${ELF} ${HEX}
+
+clean : 
+    rm -f out.*
+    rm -f *.o
