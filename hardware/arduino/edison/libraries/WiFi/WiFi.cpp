@@ -1,6 +1,6 @@
 /* WiFi library that uses the Intel Centrino N-135 wireless */
 #include "WiFi.h"
-#include <trace.h>
+#include "trace.h"
 extern "C" {
   #include "utility/wl_definitions.h"
   #include "utility/n135.h"
