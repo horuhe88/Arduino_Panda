@@ -5,7 +5,7 @@
 #ifndef DNSClient_h
 #define DNSClient_h
 
-#include <WiFiUdp.h>
+#include "WiFiUdp.h"
 
 class DNSClient
 {

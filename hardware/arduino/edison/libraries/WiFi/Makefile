@@ -25,7 +25,7 @@ stag.elf.lst: sw
 
 mybin.elf : $(C_FILES) $(CPP_FILES) $(H_FILES) $(S_FILES) 
 	mkdir ./out
-	$(NANOC) -Wall -fno-exceptions -fpermissive -Waddress -Wcomment -Wwrite-strings -Wformat-security -Wformat-extra-args -O0 -o ./out/mybin.out -static $(filter %.c %.cpp %.s, $^)
+	$(NANOC) -Wall -fno-exceptions -fpermissive -Waddress -Wcomment -Wwrite-strings -Wsign-compare -Wunused-variable -Wformat-security -Wformat-extra-args -O0 -o ./out/mybin.out -static $(filter %.c %.cpp %.s, $^)
 	#objdump -DSw ./out/mybin.elf > ./out/mybin.elf.lst
 
 
