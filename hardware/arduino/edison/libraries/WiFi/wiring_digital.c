@@ -63,6 +63,7 @@
 #include "trace.h"
 #include "Arduino.h"
 #include "sysfs.h"
+#include "variant.h"
 #include "fast_gpio_sc.h"
 #include "fast_gpio_nc.h"
 #include "Mux.h"
