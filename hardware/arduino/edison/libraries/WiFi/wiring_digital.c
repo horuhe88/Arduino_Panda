@@ -60,7 +60,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
-#include <trace.h>
+#include "trace.h"
 #include "Arduino.h"
 #include "sysfs.h"
 #include "fast_gpio_sc.h"

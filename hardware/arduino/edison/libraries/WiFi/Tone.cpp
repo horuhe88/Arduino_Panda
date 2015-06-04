@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #include <pthread.h>
-#include <Arduino.h>
+#include "Arduino.h"
 
 struct tone_thread_param
 {

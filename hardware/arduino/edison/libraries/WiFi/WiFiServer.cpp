@@ -6,7 +6,7 @@
 #include <sys/types.h>		// connect
 #include <sys/socket.h>		// connect
 
-#include <trace.h>
+#include "trace.h"
 
 #define MY_TRACE_PREFIX "WiFiServer"
 

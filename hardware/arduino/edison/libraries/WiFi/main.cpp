@@ -18,9 +18,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
  */
 // Arduino hooks
-#include <Arduino.h>
-#include <trace.h>
-#include <interrupt.h>
+#include "Arduino.h"
+#include "trace.h"
+#include "interrupt.h"
 #include <sys/stat.h>
 
 #define PLATFORM_NAME_PATH "/sys/devices/platform/"

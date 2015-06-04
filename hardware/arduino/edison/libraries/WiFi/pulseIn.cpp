@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
 */
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 #define READ(PIN) (fastMode?(fastGpioDigitalRead(fastPin)):(digitalRead(pin)))
 

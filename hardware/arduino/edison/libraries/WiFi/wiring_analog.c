@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <trace.h>
+#include "trace.h"
 
 #include "Arduino.h"
 #include "pins_arduino.h"

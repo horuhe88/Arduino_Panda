@@ -7,7 +7,7 @@
 #include <sys/socket.h>		// connect
 
 // Firmware includes specific to galileo
-#include <trace.h>
+#include "trace.h"
 
 #define MY_TRACE_PREFIX "WiFiClient"
 

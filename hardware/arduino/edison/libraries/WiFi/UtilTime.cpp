@@ -18,14 +18,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
 
-#include <Arduino.h>
+#include "Arduino.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <limits.h>
 #include <sys/sysinfo.h>
 
-#include <UtilTime.h>
-#include <trace.h>
+#include "UtilTime.h"
+#include "trace.h"
 
 static uint64_t tsc_init = 0;
 static float clocks_per_ns = 0;

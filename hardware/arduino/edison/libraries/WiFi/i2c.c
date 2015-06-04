@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <trace.h>
+#include "trace.h"
 #include "i2c-dev.h"
 
 #define MAX_BUF 100

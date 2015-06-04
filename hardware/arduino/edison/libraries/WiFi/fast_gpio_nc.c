@@ -44,8 +44,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/types.h>
 
 /* ia32 port */
-#include <Arduino.h>
-#include <trace.h>
+#include "Arduino.h"
+#include "trace.h"
 #include "fast_gpio_common.h"
 
 #define UIO_NAME "sch_gpio"

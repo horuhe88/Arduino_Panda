@@ -39,7 +39,7 @@
 #include "Udp.h"
 #include "Dns.h"
 
-#include <trace.h>
+#include "trace.h"
 
 #define MY_TRACE_PREFIX "WiFiUDP"
 

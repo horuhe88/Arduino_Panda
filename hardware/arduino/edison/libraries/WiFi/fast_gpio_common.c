@@ -35,7 +35,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define UIO_DIR "/sys/class/uio/"
 #define UIO_MAX_NAME_LEN 256
 
-/*int fastGpioFindUioByName(const char *name)
+
+
+
+int fastGpioFindUioByName(const char *name)
 {
 	const struct dirent *ent;
 	int uio_num;
@@ -84,7 +87,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 			}
 			fclose(nameFile);
 
-			/* thisname might contain a carriage return, remove if so /
+			/* thisname might contain a carriage return, remove if so */
 			cr = strpbrk(thisname, "\r\n");
 			if (cr)
 				*cr = '\0';
@@ -100,7 +103,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 	trace_error("No match found for UIO device '%s'\n", name);
 	closedir(dp);
 	return -ENODEV;
-}*/
+}
 
 
 int fastGpioGetInfo(const int uio_num,

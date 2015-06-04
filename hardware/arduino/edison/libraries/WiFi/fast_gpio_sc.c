@@ -40,8 +40,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/mman.h>
 #include <sys/types.h>
 
-#include <Arduino.h>
-#include <trace.h>
+#include "Arduino.h"
+#include "trace.h"
 #include "fast_gpio_common.h"
 
 #define UIO_NAME "gpio uio"

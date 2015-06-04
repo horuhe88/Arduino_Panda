@@ -16,12 +16,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <Arduino.h>		// Contains types
+#include "Arduino.h"		// Contains types
 #include <errno.h>			// -EINVAL and friends
-#include <Mux.h>
+#include "Mux.h"
 #include "variant.h"		// Contains board specific data to drive muxing options
 #include "sysfs.h"
-#include <trace.h>
+#include "trace.h"
 
 #define MY_TRACE_PREFIX "mux"
 

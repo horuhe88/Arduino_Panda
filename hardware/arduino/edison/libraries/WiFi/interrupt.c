@@ -41,10 +41,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <unistd.h>
 
 /* ia32 port */
-#include <Arduino.h>
-#include <interrupt.h>
-#include <trace.h>
-#include <wiring_digital.h>
+#include "Arduino.h"
+#include "interrupt.h"
+#include "trace.h"
+#include "wiring_digital.h"
 
 #define __TTYUART_IDX_TX 1
 #define __TTYUART_IDX_RX 0

@@ -7,7 +7,7 @@
 
 #include "Dns.h"
 #include <string.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 #include "Arduino.h"
 
 #if 0

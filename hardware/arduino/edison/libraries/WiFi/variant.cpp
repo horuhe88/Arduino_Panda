@@ -19,9 +19,9 @@
 
 //////////////////////////// Galileo Fab C ////////////////////////////
 
-#include <Arduino.h>
+#include "Arduino.h"
 #include <errno.h>
-#include <sysfs.h>
+#include "sysfs.h"
 #include "variant.h"
 
 //Bindings to Arduino
