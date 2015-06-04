@@ -68,25 +68,23 @@
 #include "fast_gpio_nc.h"
 #include "Mux.h"
 
-	int pinToFastPin(register uint8_t pin)
-{
 
-	// this is Galileo Gen 2
-			#define GPIO_FAST_IO0 0;         
-			#define GPIO_FAST_IO1 1;
-	//both Gen1 and Gen2
-			#define GPIO_FAST_IO2 2;
-			#define GPIO_FAST_IO3 3;
-	// this is Galileo Gen 2 - no fast I/O for pins 7 and 8
-			#define GPIO_FAST_IO4 4 ;
-			#define GPIO_FAST_IO5 5;
-			#define GPIO_FAST_IO6 6;
-			#define GPIO_FAST_IO9 9;
-	        #define GPIO_FAST_IO10 10;
-	        #define GPIO_FAST_IO11 11;
-	        #define GPIO_FAST_IO12 12;
-	        #define GPIO_FAST_IO13 13;
-}
+// this is Galileo Gen 2
+#define GPIO_FAST_IO0 0         
+#define GPIO_FAST_IO1 1
+//both Gen1 and Gen2
+#define GPIO_FAST_IO2 2
+#define GPIO_FAST_IO3 3
+// this is Galileo Gen 2 - no fast I/O for pins 7 and 8
+#define GPIO_FAST_IO4 4
+#define GPIO_FAST_IO5 5
+#define GPIO_FAST_IO6 6
+#define GPIO_FAST_IO9 9
+#define GPIO_FAST_IO10 10
+#define GPIO_FAST_IO11 11
+#define GPIO_FAST_IO12 12
+#define GPIO_FAST_IO13 13
+
 
 #define MY_TRACE_PREFIX "wiring_digital"
 

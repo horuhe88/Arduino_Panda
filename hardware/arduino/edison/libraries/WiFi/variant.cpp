@@ -38,11 +38,11 @@ extern "C" {
  * TODO handle the interrupt-capable gpios
  */
 
-int mux_sel_analog[NUM_ANALOG_INPUTS];
+/*int mux_sel_analog[NUM_ANALOG_INPUTS];
 
 int mux_sel_uart[NUM_UARTS][MUX_DEPTH_UART];
 
-int  mux_sel_spi[NUM_SPI][MUX_DEPTH_SPI];
+int  mux_sel_spi[NUM_SPI][MUX_DEPTH_SPI];*/
 
 #if 0
 /*
