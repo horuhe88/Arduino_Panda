@@ -22,8 +22,8 @@ extern "C" {
 
 #include <stdio.h>
 #include "trace.h"
-
 #include "Arduino.h"
+#include "sysfs"
 #include "pins_arduino.h"
 
 #define MY_TRACE_PREFIX "wiring_analog"
