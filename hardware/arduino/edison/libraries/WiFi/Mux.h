@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define __MUX_H__
 
 #include "Arduino.h"		// Contains types
-#include <wiring_digital.h>
+#include "wiring_digital.h"
 
 #ifdef __cplusplus
 extern "C" {
