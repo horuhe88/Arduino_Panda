@@ -69,56 +69,22 @@
 
 	int pinToFastPin(register uint8_t pin)
 {
-	switch (pin)
-    {
-	
-#if PLATFORM_ID != 0x06
+
 	// this is Galileo Gen 2
-	case 0:
-		#define GPIO_FAST_IO0 0;
-		break;              
-	case 1:
-		#define GPIO_FAST_IO1 1;
-		break;
-#endif
+			#define GPIO_FAST_IO0 0;         
+			#define GPIO_FAST_IO1 1;
 	//both Gen1 and Gen2
-	case 2:
-		#define GPIO_FAST_IO2 2;
-		break;
-	case 3:
-		#define GPIO_FAST_IO3 3;
-		break;
-#if PLATFORM_ID != 0x06               
+			#define GPIO_FAST_IO2 2;
+			#define GPIO_FAST_IO3 3;
 	// this is Galileo Gen 2 - no fast I/O for pins 7 and 8
-	case 4:
-		#define GPIO_FAST_IO4 4 ;
-		break;
-	case 5:
-		#define GPIO_FAST_IO5 5;
-		break;
-	case 6:
-		#define GPIO_FAST_IO6 6;
-		break;
-	case 9: 
-		#define GPIO_FAST_IO9 9;
-		break;
-	case 10:
-		#define GPIO_FAST_IO10 10;
-		break;
-	case 11:
-		#define GPIO_FAST_IO11 11;
-		break;
-	case 12:
-		#define GPIO_FAST_IO12 12;
-		break;
-	case 13:
-		#define GPIO_FAST_IO13 13;
-		break;
-#endif               
-	default:
-		return 0;
-		break;
-	}
+			#define GPIO_FAST_IO4 4 ;
+			#define GPIO_FAST_IO5 5;
+			#define GPIO_FAST_IO6 6;
+			#define GPIO_FAST_IO9 9;
+	        #define GPIO_FAST_IO10 10;
+	        #define GPIO_FAST_IO11 11;
+	        #define GPIO_FAST_IO12 12;
+	        #define GPIO_FAST_IO13 13;
 }
 
 #define MY_TRACE_PREFIX "wiring_digital"

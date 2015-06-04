@@ -32,17 +32,17 @@ extern "C" {
 #undef word
 #endif
 
-#ifdef __cplusplus
-long int random( long ) ;
+/*#ifdef __cplusplus
+//long int random( long ) ;
 long int random( long, long ) ;
-#endif
+#endif*/
 
 void randomSeed( uint32_t dwSeed ) ;
 
 long map( long, long, long, long, long ) ;
 
 #ifdef __cplusplus
-uint16_t makeWord( uint16_t w) ;
+//uint16_t makeWord( uint16_t w) ;
 uint16_t makeWord( uint8_t h, uint8_t l ) ;
 #define word(...) makeWord(__VA_ARGS__)
 #endif

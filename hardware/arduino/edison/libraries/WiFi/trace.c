@@ -114,15 +114,15 @@ static void * trace_main ( void * pargs )
 			case 0:
 				/* timeout */
 				break;
-			default:
-				/* Process data */
+/*			default:
+				/ Process data /
 				if(FD_ISSET(tdesc.pipe_tx_rx[__TTYUART_IDX_RX], &fdset)){
 
-					/* Read in frame */
+					/ Read in frame /
 					ret = read(tdesc.pipe_tx_rx[__TTYUART_IDX_RX],(char*)&tmsg, sizeof(tmsg));
 					if(ret < 0){
 						if((ret =! EAGAIN) && (ret != EWOULDBLOCK)){
-							/* Critical - exit out */
+							/* Critical - exit out /
 							loop = 0;
 						}
 					}else{
@@ -152,7 +152,7 @@ static void * trace_main ( void * pargs )
 						}
 					}
 				}
-				break;
+				break;*/
 		}
 	}
 
@@ -187,11 +187,11 @@ int trace_init( trace_level_t new_tlevel, in_addr_t ip_addr)
 	}
 
 	/* Setup pipe */
-	ret = pipe2(tdesc.pipe_tx_rx, O_NONBLOCK);
+/*	ret = pipe2(tdesc.pipe_tx_rx, O_NONBLOCK);
 	if (ret < 0){
 		fprintf(stderr, "error making pipe!\n");
 		return errno;
-	}
+	}*/
 
 	pthread_barrier_init(&tdesc.barrier, 0, 2);
 
@@ -215,15 +215,15 @@ void trace_fini(void)
 	struct trace_msg tmsg;
 
 	/* Send trace message */
-	tmsg.tcmd = TRACE_CMD_EXIT;
+/*	tmsg.tcmd = TRACE_CMD_EXIT;
 	if(write(tdesc.pipe_tx_rx[__TTYUART_IDX_TX], (const char*)&tmsg, sizeof(tmsg))<0){
 		fprintf(stderr, "trace error %d\n", errno);
-	}
+	}*/
 
 	/* Join thread */
 	pthread_join(tdesc.thread, 0);
 
-	if (tdesc.pipe_tx_rx[__TTYUART_IDX_TX] != -1){
+/*	if (tdesc.pipe_tx_rx[__TTYUART_IDX_TX] != -1){
 		close(tdesc.pipe_tx_rx[__TTYUART_IDX_TX]);
 		tdesc.pipe_tx_rx[__TTYUART_IDX_TX] = -1;
 	}
@@ -231,7 +231,7 @@ void trace_fini(void)
 	if (tdesc.pipe_tx_rx[__TTYUART_IDX_RX] != -1){
 		close(tdesc.pipe_tx_rx[__TTYUART_IDX_RX]);
 		tdesc.pipe_tx_rx[__TTYUART_IDX_RX] = -1;
-	}
+	}*/
 }
 
 /**
@@ -314,9 +314,9 @@ void trace(trace_level_t tlevel, const char * prefix, const char * fmt, ...)
 	tmsg.tcmd = TRACE_CMD_TRACE;
 	tmsg.tlevel = tlevel;
 
-	if(write(tdesc.pipe_tx_rx[__TTYUART_IDX_TX], (const char*)&tmsg, sizeof(tmsg))<0){
+/*	if(write(tdesc.pipe_tx_rx[__TTYUART_IDX_TX], (const char*)&tmsg, sizeof(tmsg))<0){
 		fprintf(stderr, "trace error %d\n", errno);
 		fflush(stderr);
-	}
+	}*/
 }
 
